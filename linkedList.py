@@ -14,7 +14,7 @@ class ListNode:
     def traverse(self):
         p = self
         while p != None:
-            print(p.val)
+            print(p.val,end="->")
             p = p.next
 
 class Solution:
@@ -25,7 +25,6 @@ class Solution:
         head.next.next=head
         head.next=None
         return kn
-
 
     def addTwoNumbers(self, l1: ListNode, l2: ListNode) -> ListNode:
         #初始化哑节点，最后返回newHead.next
@@ -70,8 +69,6 @@ class Solution:
         pre.next=cur.next
         return head
 
-
-
     def swapPairs(self, head: ListNode) -> ListNode:
         if head==None or head.next==None:
             return head
@@ -92,6 +89,29 @@ class Solution:
             subSwapPairs(head)
             return newHead
 
+    def rotateRight(self, head, k):
+        """
+        :type head: ListNode
+        :type k: int
+        :rtype: ListNode
+        """
+        if head is None or head.next is None or k==0:
+            return head
+        length=2
+        #the last 2 nodes is p,q
+        p=head
+        q=head.next
+        while q.next!=None:
+            p=p.next
+            q=q.next
+            length+=1
+        if k>=length:
+            return self.rotateRight(head,k-length)
+        q.next=head
+        p.next=None
+        return self.rotateRight(q,k-1)
+
+
 
 
 if __name__ == '__main__':
@@ -108,11 +128,13 @@ if __name__ == '__main__':
     l2.tailInsert(3)
     l2.tailInsert(4)
     l2.tailInsert(6)
-    l2.tailInsert(2)
-    l2.tailInsert(2)
+
     s=Solution()
     # newHead=s.addTwoNumbers(head,l2)
-    newHead=s.swapPairs(l2)
-    newHead.traverse()
+    # newHead=s.swapPairs(l2)
+    l2.traverse()
+    print()
+    l2=s.rotateRight(l2,1)
+    l2.traverse()
 
 
