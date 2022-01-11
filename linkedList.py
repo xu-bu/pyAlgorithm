@@ -18,6 +18,12 @@ class ListNode:
             p = p.next
 
 class Solution:
+    def createList(self,nums):
+        head=ListNode(nums[0])
+        for i in range(1,len(nums)):
+            head.tailInsert(nums[i])
+        return head
+
     def reverse(self,head:ListNode)->ListNode:
         if head==None or head.next==None:
             return head
@@ -112,29 +118,42 @@ class Solution:
         return self.rotateRight(q,k-1)
 
 
+    def deleteDuplicates(self, head):
+        """
+        :type head: ListNode
+        :rtype: ListNode
+        """
+        if head.val==head.next.val and head.next.next==None:
+            return None
+        #初始化哑节点
+        newHead=ListNode(-1)
+        newHead.next=head
+        p=newHead
+
+        while p.next!=None:
+            q = p.next
+            if q.next==None:
+                return newHead.next
+            if p.val!=q.val and q.val!=q.next.val:
+                p=p.next
+                continue
+            while q.next != None and q.val == q.next.val:
+                q = q.next
+            p.next = q.next
+
+
+
+        return newHead.next
 
 
 if __name__ == '__main__':
-    head=ListNode(9)
-    head.tailInsert(9)
-    head.tailInsert(9)
-    head.tailInsert(9)
-    head.tailInsert(9)
-    head.tailInsert(9)
-    head.tailInsert(9)
-
-    l2=ListNode(2)
-    l2.tailInsert(5)
-    l2.tailInsert(3)
-    l2.tailInsert(4)
-    l2.tailInsert(6)
+    nums=[1,1,1,2,3]
 
     s=Solution()
+    head=s.createList(nums)
     # newHead=s.addTwoNumbers(head,l2)
     # newHead=s.swapPairs(l2)
-    l2.traverse()
-    print()
-    l2=s.rotateRight(l2,1)
-    l2.traverse()
+    head.traverse()
+    s.deleteDuplicates(head)
 
 
