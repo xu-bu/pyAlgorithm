@@ -78,41 +78,10 @@ class Solution(object):
         ans.append([])
         return ans
 
-    #22 从小列表中选元素生成短长度n的全排列
-    def generateParenthesis(self, n):
-        """
-        :type n: int
-        :rtype: List[str]
-        """
-        ans = []
-        item = []
-        chs = ['(', ')']
-        self.l = self.r = 0
 
-        def backtrack(k):
-            if len(item) == 2 * n:
-                temp = "".join(item)
-                if temp and self.l == self.r:
-                    ans.append(temp)
-                return
-            for i in chs:
-                if self.r > self.l:
-                    continue
-                if i == '(':
-                    self.l += 1
-                else:
-                    self.r += 1
-                item.append(i)
-                backtrack(k + 1)
-                if item.pop() == '(':
-                    self.l -= 1
-                else:
-                    self.r -= 1
 
-        backtrack(0)
-        return ans
-
-    #77 Cnk 从无重复元素长度为n的大列表中取k个元素出来做组合（结果有序）。然后39
+    #77 Cnk 从无重复元素长度为n的大列表中取k个元素出来做组合（结果有序）
+    #排列和全子集有两个区别，一是出口条件是items的长度是否为n，二是pop之后没有第二次的回溯
     def combine(self,nums,k):
         n=len(nums)
         ans=[]
@@ -123,78 +92,68 @@ class Solution(object):
                 return
             for j in range(i,n):
                 item.append(nums[j])
-                #注意这里是j+1不是i+1
+                #注意这里是j+1不是i+1,如果是i+1，会有重复
                 backtrack(j+1)
                 item.pop()
         backtrack(0)
         return ans
 
-    #39 可重复选元素的组合，但是这个题和40用dfs的回溯更好
+    #39 可重复选元素的组合
     def combinationSum(self, candidates, target):
         """
         :type candidates: List[int]
         :type target: int
         :rtype: List[List[int]]
         """
-        ans = []
-        item = []
-        n = len(candidates)
-
-        def backtrack(i):
-            s = sum(item)
-            if s == target:
-                temp = sorted(item)
-                if temp not in ans:
-                    ans.append(temp)
+        ans=[]
+        item=[]
+        n=len(candidates)
+        def backtrack(i,target):
+            if target==0:
+                ans.append(item[:])
                 return
-            elif s > target:
-                return
-            for j in range(n):
-                item.append(candidates[j])
-                backtrack(i + 1)
-                item.pop()
-
-        backtrack(0)
-        return ans
-
-    #40 含重复元素的列表中选部分出来组合+剪枝，也是用dfs回溯更好
-    def combinationSum2(self, candidates, target):
-        """
-        :type candidates: List[int]
-        :type target: int
-        :rtype: List[List[int]]
-        """
-        candidates.sort()
-        ans = []
-        item = []
-        n = len(candidates)
-
-        def backtrack(i):
-            s = sum(item)
-            if s == target:
-                #有重复元素，所以需要去重
-                temp = sorted(item)
-                if temp not in ans:
-                    ans.append(temp)
-                return
-            elif s > target:
-                return
-
-            for j in range(i, n):
-                #剪枝
-                if candidates[j] > target:
-                    return
-                if j > i and candidates[j] == candidates[j - 1]:
+            for j in range(i,n):
+                #循环中剪枝
+                if candidates[j]>target:
                     continue
                 item.append(candidates[j])
-                backtrack(j + 1)
+                target-=candidates[j]
+                #由于每个元素可以重复选，所以这里不是j+1
+                backtrack(j,target)
                 item.pop()
+                target+=candidates[j]
+        backtrack(0,target)
+        return ans
 
-        backtrack(0)
+    #40 含重复元素的列表中选部分出来组合+剪枝
+    def combinationSum2(self, candidates: list[int], target: int) -> list[list[int]]:
+        #首先对candidates排序避免结果重复
+        candidates.sort()
+        ans = []
+        item=[]
+        n=len(candidates)
+        def dfs(i,target):
+            if target==0:
+                ans.append(item[:])
+                return
+            for j in range(i, n):
+                if candidates[j] > target:
+                    continue
+                # 最重要的剪枝，当以中间的数开头时，不用再枚举前面的数
+                if j>i and candidates[j] == candidates[j -1]:
+                    continue
+                target-=candidates[j]
+                item.append(candidates[j])
+                dfs(j+1,target)
+                item.pop()
+                target+=candidates[j]
+        dfs(0,target)
         return ans
 
     # 46，47 全排列（含或不含重复元素均可），核心思想在于使用verdict数组判断元素是否已使用
+    #除了verdict，和组合的另一个区别在于for循环是for j in range(n)而不是for j in range(i,n)
     # 以[1,2,3]为例,如果使用暴力法，会出现[1,1,1]的情况，复杂度为n^n，而回溯法的复杂度是全排列的数量，为n!
+    #除此之外，此题效率最高的写法是用递归
     def permute(self, nums):
         """
         :type nums: List[int]

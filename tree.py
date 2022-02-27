@@ -10,6 +10,8 @@ class TreeNode:
         self.val=val
         self.left,self.right=left,right
 
+
+
 #通过root遍历一棵树，初始队列只有根节点，count从0开始递增，每次将queue[count].val加入到输出中，同时将被遍历的节点的孩子节点全部加入到queue中，如果遍历到空节点，则向输出中加入null，直到count==len(queue)
 def TreeNodeToString(root):
     if not root:
@@ -84,6 +86,7 @@ def isFullBtree(head:TreeNode):
     else:
         return False
 
+
 # 层次遍历二叉树的节点（包括空节点），全部放到一个队列里，会发现以下规律：
 #
 # A B C D E F G 0 0 0 0 0 0
@@ -91,6 +94,7 @@ def isFullBtree(head:TreeNode):
 # 规律就是前面是非空节点，而后面是空节点。如果是非完全二叉树呢，那么出现以下现象：
 #
 # A B 0 0 C D 0 0 E F G
+#所以只需要不管孩子节点是不是空节点，都入队，直到遇到空节点出队时，将所有节点出队，如果还有非空节点则说明不是完全二叉树
 def isCompleteTree(head:TreeNode):
     if head==None:
         return True
@@ -163,7 +167,6 @@ class Solution:
         :type n: int
         :rtype: List[TreeNode]
         """
-
         #根据[start,end]中的数生成所有可行的bst,返回存有这些bst的根节点的列表
         def generate(start,end):
             if start>end:
@@ -184,30 +187,33 @@ class Solution:
             return ans
         return generate(1,n) if n else []
 
-    #99 中序遍历bst，其结果一定是从小到大
-    def recoverTree(self, root):
-        """
-        :type root: TreeNode
-        :rtype: None Do not return anything, modify root in-place instead.
-        """
-        t1=t2=pre=None
+#上一题的dp做法，把哈希表当作二维数组，存储build(start,end)的结果以供重复使用。dp[start*n+end]=build(start,end)
+    def generateTreesDP(self, n):
+        dp = collections.defaultdict(list)
 
-        def inOrder(root):
-            nonlocal t1,t2,pre
-            if not root:
-                return
-            inOrder(root.left)
-            #不断拿数和它前面的数比，第一次发现有数比前面的数小，说明它前面的数位置不对，第二次发现时，说明自己的位置不对。但特殊情况是只有两个数，所以干脆第一次发现时就把pre和cur都当作有问题的，后面再发现有问题的，就赋值给t2
-            if pre!=None and root.val<pre.val:
-                if not t1:
-                    t1=pre
-                t2=root
-            pre=root
-            inOrder(root.right)
+        def build(start, end):
+            if start > end:
+                return [None]
+            elif start == end:
+                return [TreeNode(start)]
+            for i in range(start, end + 1):
+                if len(dp[n * start + i - 1]) != 0:
+                    leftTrees = dp[n * start + i - 1][:]
+                else:
+                    leftTrees = build(start, i - 1)
+                if len(dp[(i + 1) * n + end]) != 0:
+                    rightTrees = dp[(i + 1) * n + end][:]
+                else:
+                    rightTrees = build(i + 1, end)
+                for left in leftTrees:
+                    for right in rightTrees:
+                        root = TreeNode(i)
+                        root.left = left
+                        root.right = right
+                        dp[start * n + end].append(root)
+            return dp[start * n + end]
+        return build(1, n)
 
-        inOrder(root)
-        t1.val,t2.val=t2.val,t1.val
-        return root
 #102
     def levelOrder(self, root):
         """
@@ -240,85 +246,87 @@ class Solution:
             index+=1
         return ans
 
-    #根据前序遍历和中序遍历恢复二叉树
-    def buildTree(self, preorder, inorder):
-        """
-        :type preorder: List[int]
-        :type inorder: List[int]
-        :rtype: TreeNode
-        """
-        p=0
-        n=len(preorder)
-        if n==1:
-            return TreeNode(preorder[0])
-        if n==0:
-            return None
-        root=preorder[0]
-        while p<n:
-            if inorder[p]!=root:
-                p+=1
-            else:
-                break
-        root=TreeNode(root)
+    #105 根据前序遍历和中序遍历恢复二叉树
+    def buildTree(self, preorder: list[int], inorder: list[int]) -> TreeNode:
+        dic = {}
+        #利用字典，快速确定preorder中根节点的index
+        for i in range(len(inorder)):
+            dic[inorder[i]] = i
 
-        root.left=self.buildTree(preorder[1:p+1],inorder[:p])
-        root.right=self.buildTree(preorder[p+1:],inorder[p+1:])
-        return root
+        def myBuild(preStart, preEnd, inStart, inEnd):
+            if inStart == inEnd:
+                return None
+            elif inStart + 1 == inEnd:
+                return TreeNode(preorder[preStart])
+            root = TreeNode(preorder[preStart])
+            inOrderMidIndex = dic[preorder[preStart]]
+            leftLen = inOrderMidIndex - inStart
+            rightLen = inEnd - inOrderMidIndex - 1
+            l = myBuild(preStart + 1, preStart + leftLen + 1, inStart, inStart + leftLen)
+            r = myBuild(preStart + leftLen + 1, preStart + leftLen + 1 + rightLen, inOrderMidIndex + 1, inEnd)
+            root.left = l
+            root.right = r
+            return root
 
-    #113 回溯法遍历二叉树的所有路径
+        return myBuild(0, len(preorder), 0, len(inorder))
+
+    #113 dfs遍历二叉树的所有路径
     def pathSum(self, root: [TreeNode], targetSum: int) -> list[list[int]]:
-        ans,item=[],[]
-        pSum=0
-        def backtrack(node):
-            nonlocal pSum
+        #不能写成item=ans=[]，因为item和ans都是指针，这样会导致两个指针指向同一个列表
+        item,ans=[],[]
+        #dfs至少要两个参数，考虑空节点，写前两行，然后处理当前节点加入路径，判断是否能加入ans，dfs左侧，dfs右侧，完成上述操作后如果还没return，说明当前节点不属于路径，弹出
+        def dfs(node,targetSum):
+            if not node:
+                return []
             item.append(node.val)
-            pSum+=node.val
-
-            #如果是叶子节点并且路径和等于target，把item放入ans
-            if pSum==targetSum and not node.left and not node.right:
-                if len(item)==0 and targetSum==0:
-                    return []
+            targetSum-=node.val
+            if not node.left and not node.right and targetSum==0:
                 ans.append(item[:])
-                return
-
-            if node.left:
-                backtrack(node.left)
-                item.pop()
-                pSum -= node.left.val
-            if node.right:
-                backtrack(node.right)
-                item.pop()
-                pSum -= node.right.val
-        backtrack(root)
+                #此处不用return，即使下面是空节点也依然dfs，通过开头的判断来return
+            dfs(node.left,targetSum)
+            dfs(node.right,targetSum)
+            item.pop()
+        dfs(root,targetSum)
         return ans
 
-    def flatten(self, root: TreeNode) -> None:
-        """
-        Do not return anything, modify root in-place instead.
-        """
-        if not root:
-            return
-        if not root.left and not root.right:
-            return
-        self.flatten(root.left)
-        self.flatten(root.right)
-        temp=root.right
-        root.right=root.left
-        root.left=None
-        p=root
-        while True:
-            if not p.left and not p.right:
-                break
-            p=p.right
-        p.right=temp
+
+
+#236 二叉树中找任意两个节点的最近公共祖先
+    #首先遍历树，生成字典存储节点与其父节点的对应关系，然后从p节点出发去寻找根节点，标记路过的节点，最后从q节点出发回到根节点，当发现第一个被标记了的父节点时，即为ans
+    def lowestCommonAncestor(self, root: TreeNode, p: TreeNode, q: TreeNode) -> TreeNode:
+        dic={}
+        def preOrder(root):
+            if not root:
+                return
+            if root.left:
+                dic[root.left.val]=root
+                preOrder(root.left)
+            if root.right:
+                dic[root.right.val]=root
+                preOrder(root.right)
+        preOrder(root)
+        visit=collections.defaultdict(int)
+        while p!=root:
+            visit[p.val]=1
+            p=dic[p.val]
+        visit[p.val]=1
+        while visit[q.val]!=1:
+            q=dic[q.val]
+        return q
 
 
 if __name__ == '__main__':
-    root = '[1,2,3,4,5,null,7]'
-    targetSum = -5
+    A = '[1,null,null]'
+    A=stringToTreeNode(A)
+    # print(TreeNodeToString(c.deserialize(A)))
+    B = '[]'
     s=Solution()
-    root=stringToTreeNode(root)
-    print(s.levelOrder(root))
+    for each in s.test(3):
+        print(TreeNodeToString(each))
+
+    # print(TreeNodeToString(B))
+    # print(s.isBalanced(A))
+
 
 
 
