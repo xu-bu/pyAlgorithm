@@ -314,17 +314,68 @@ class Solution:
             q=dic[q.val]
         return q
 
+    def createBinaryTree(self, descriptions):
+        """
+        :type descriptions: List[List[int]]
+        :rtype: Optional[TreeNode]
+        """
+        root = []
+        nodeDic = collections.defaultdict(bool)
+        for each in descriptions:
+            parent, child, isLeft = each[0], each[1], each[2]
+            if not nodeDic[parent]:
+                node = TreeNode(parent)
+                root.append(parent)
+                nodeDic[parent] = node
+            if not nodeDic[child]:
+                node = TreeNode(child)
+                nodeDic[child] = node
+
+        for each in descriptions:
+            # parent,child,isLeft
+            parent, child, isLeft = each[0], each[1], each[2]
+            if child in root:
+                root.remove(child)
+            if isLeft:
+                nodeDic[parent].left = nodeDic[child]
+            else:
+                nodeDic[parent].right = nodeDic[child]
+        return nodeDic[root[0]]
+
+    class Solution:
+        def levelOrder(self, root: TreeNode) -> list[int]:
+            if not root:
+                return []
+            cur, next = 1, 0
+            queue = [root]
+            index = 0
+            ans = []
+            items = []
+            while index < len(queue):
+                node = queue[index]
+                items.append(node.val)
+                if node.left:
+                    queue.append(node.left)
+                    next += 1
+                if node.right:
+                    queue.append(node.right)
+                    next += 1
+                if len(items) == cur:
+                    ans += items
+                    items = []
+                    cur, next = next, 0
+            return ans
 
 if __name__ == '__main__':
     A = '[1,null,null]'
     A=stringToTreeNode(A)
+    des=[[20,15,1],[20,17,0],[50,20,1],[50,80,0],[80,19,1]]
     # print(TreeNodeToString(c.deserialize(A)))
     B = '[]'
     s=Solution()
-    for each in s.test(3):
-        print(TreeNodeToString(each))
+    root=s.createBinaryTree(des)
 
-    # print(TreeNodeToString(B))
+    print(TreeNodeToString(root))
     # print(s.isBalanced(A))
 
 

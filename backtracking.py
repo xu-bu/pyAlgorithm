@@ -67,7 +67,7 @@ class Solution(object):
             #i代表插入nums[i],所以递归出口是i>=n，但是要注意出口只需要return，因为对于全集，其过程是先item.append最后一个元素，然后ans.append(item)，然后再backtrack进入到递归出口
             if i>=n:
                 return
-            #一定要先忘item里面加，再往ans里面加。注意ans.append时要append深拷贝，不然随着item在之后的回溯中发生变化，ans中的item也会变
+            #一定要先往item里面加，再往ans里面加。注意ans.append时要append深拷贝，不然随着item在之后的回溯中发生变化，ans中的item也会变
             item.append(nums[i])
             if sorted(item) not in ans:
                 ans.append(sorted(item)[:])
@@ -166,7 +166,6 @@ class Solution(object):
         verdict = [False] * n
 
         def backtrack():
-            # 这里必须是len(item)，由于递归出口改变了，所以backtrack不需要形参了
             if len(item) == n:
                 if item not in ans:
                     ans.append(item[:])
