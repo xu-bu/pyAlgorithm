@@ -1,4 +1,3 @@
-
 #将排好序的两个数组合并,并返回这个排好序的数组
 import random
 import time
@@ -33,19 +32,24 @@ def mergeSort(nums):
 
 
 
-def partition(arr, low, high):
-    i = (low - 1)  # 最小元素索引
-    pivot = arr[high]
-
-    for j in range(low, high):
-
-        # 当前元素小于或等于 pivot
-        if arr[j] <= pivot:
-            i = i + 1
-            arr[i], arr[j] = arr[j], arr[i]
-
-    arr[i + 1], arr[high] = arr[high], arr[i + 1]
-    return (i + 1)
+def partition(arr, left, right):
+    #pivot=left
+    # 随机更换pivot加快速度
+    pivot = random.randint(left,right)
+    arr[pivot],arr[left]=arr[left],arr[pivot]
+    #双指针，快指针i，慢指针index
+    index = pivot+1
+    i = index
+    #i遍历所有数，index是小于arr[pivot]的数该站的位置
+    while  i <= right:
+        if arr[i] < arr[pivot]:
+            arr[i], arr[index] = arr[index], arr[i]
+            index+=1
+        i+=1
+    #index+1导致它指到了下一个位置，所以需要减一
+    arr[pivot], arr[index-1] = arr[index-1], arr[pivot]
+    #返回pivot的位置
+    return index-1
 
 
 # arr[] --> 排序数组
@@ -55,7 +59,8 @@ def partition(arr, low, high):
 # 快速排序函数
 def quickSort(arr, low, high):
     if low < high:
-        pi = partition(arr, low, high)
+        # pi = partition(arr, low, high)
+        pi=partition(arr,low,high)
         quickSort(arr, low, pi - 1)
         quickSort(arr, pi + 1, high)
 
@@ -72,11 +77,12 @@ nums=[]
 for i in range(1,n):
     nums.append(random.randint(1,i))
 startTime=time.time()
+quickSort(nums,0,len(nums)-1)
 print(f"quicksort runs for {time.time()-startTime}s")
 
-nums=[]
-for i in range(1,n):
-    nums.append(random.randint(1,i))
-startTime=time.time()
-sorted(nums)
-print(f"sort runs for {time.time()-startTime}s")
+# nums=[]
+# for i in range(1,n):
+#     nums.append(random.randint(1,i))
+# startTime=time.time()
+# sorted(nums)
+# print(f"sort runs for {time.time()-startTime}s")

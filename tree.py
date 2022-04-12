@@ -41,14 +41,38 @@ def TreeNodeArrayToString(TreeNodeArray):
         serializedTreeNodes.append(serializedTreeNode)
     return "[{}]".format(', '.join(serializedTreeNodes))
 
-#前序遍历
-def traverse(head:TreeNode):
-    if head==None:
-        return
-    else:
-        print(head.val)
-        traverse(head.left)
-        traverse(head.right)
+def stringToTreeNode(input):
+    input = input.strip()
+    input = input[1:-1]
+    if not input:
+        return None
+
+    inputValues = [s.strip() for s in input.split(',')]
+    root = TreeNode(int(inputValues[0]))
+    nodeQueue = [root]
+    front = 0
+    index = 1
+    while index < len(inputValues):
+        node = nodeQueue[front]
+        front = front + 1
+
+        item = inputValues[index]
+        index = index + 1
+        if item != "null":
+            leftNumber = int(item)
+            node.left = TreeNode(leftNumber)
+            nodeQueue.append(node.left)
+
+        if index >= len(inputValues):
+            break
+
+        item = inputValues[index]
+        index = index + 1
+        if item != "null":
+            rightNumber = int(item)
+            node.right = TreeNode(rightNumber)
+            nodeQueue.append(node.right)
+    return root
 
 #递归层次遍历
 def visitLevel(head:TreeNode,level):
@@ -127,38 +151,7 @@ def isValidBST(node, lower=float('-inf'), upper=float('inf')) -> bool:
         return False
     return True
 
-def stringToTreeNode(input):
-    input = input.strip()
-    input = input[1:-1]
-    if not input:
-        return None
 
-    inputValues = [s.strip() for s in input.split(',')]
-    root = TreeNode(int(inputValues[0]))
-    nodeQueue = [root]
-    front = 0
-    index = 1
-    while index < len(inputValues):
-        node = nodeQueue[front]
-        front = front + 1
-
-        item = inputValues[index]
-        index = index + 1
-        if item != "null":
-            leftNumber = int(item)
-            node.left = TreeNode(leftNumber)
-            nodeQueue.append(node.left)
-
-        if index >= len(inputValues):
-            break
-
-        item = inputValues[index]
-        index = index + 1
-        if item != "null":
-            rightNumber = int(item)
-            node.right = TreeNode(rightNumber)
-            nodeQueue.append(node.right)
-    return root
 
 class Solution:
     #95
@@ -170,7 +163,7 @@ class Solution:
         #根据[start,end]中的数生成所有可行的bst,返回存有这些bst的根节点的列表
         def generate(start,end):
             if start>end:
-                #返回空节点，在start==end的情况，根节点的孩子节点就是两个这个的空节点
+                #返回空节点，在start==end的情况，根节点的孩子节点就是两个这样的空节点
                 return [None]
             #每一次generate可行bst列表的时候，[start,end]都不同，所以需要重置ans
             ans = []
@@ -314,57 +307,9 @@ class Solution:
             q=dic[q.val]
         return q
 
-    def createBinaryTree(self, descriptions):
-        """
-        :type descriptions: List[List[int]]
-        :rtype: Optional[TreeNode]
-        """
-        root = []
-        nodeDic = collections.defaultdict(bool)
-        for each in descriptions:
-            parent, child, isLeft = each[0], each[1], each[2]
-            if not nodeDic[parent]:
-                node = TreeNode(parent)
-                root.append(parent)
-                nodeDic[parent] = node
-            if not nodeDic[child]:
-                node = TreeNode(child)
-                nodeDic[child] = node
 
-        for each in descriptions:
-            # parent,child,isLeft
-            parent, child, isLeft = each[0], each[1], each[2]
-            if child in root:
-                root.remove(child)
-            if isLeft:
-                nodeDic[parent].left = nodeDic[child]
-            else:
-                nodeDic[parent].right = nodeDic[child]
-        return nodeDic[root[0]]
 
-    class Solution:
-        def levelOrder(self, root: TreeNode) -> list[int]:
-            if not root:
-                return []
-            cur, next = 1, 0
-            queue = [root]
-            index = 0
-            ans = []
-            items = []
-            while index < len(queue):
-                node = queue[index]
-                items.append(node.val)
-                if node.left:
-                    queue.append(node.left)
-                    next += 1
-                if node.right:
-                    queue.append(node.right)
-                    next += 1
-                if len(items) == cur:
-                    ans += items
-                    items = []
-                    cur, next = next, 0
-            return ans
+
 
 if __name__ == '__main__':
     A = '[1,null,null]'
