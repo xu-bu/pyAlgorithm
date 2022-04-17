@@ -135,21 +135,7 @@ def isCompleteTree(head:TreeNode):
                 return False
         return True
 
-#98
-def isValidBST(node, lower=float('-inf'), upper=float('inf')) -> bool:
-    #如果遍历到空节点，什么整棵树都满足了，return true
-    if not node:
-        return True
-    #检查自己与自己的父节点的关系
-    val = node.val
-    if val <= lower or val >= upper:
-        return False
-    #检查左右子树，如果是右孩子，需要比自己大，所以自己是下界，上界不变。左孩子反之
-    if not isValidBST(node.right, val, upper):
-        return False
-    if not isValidBST(node.left, lower, val):
-        return False
-    return True
+
 
 
 
@@ -206,6 +192,23 @@ class Solution:
                         dp[start * n + end].append(root)
             return dp[start * n + end]
         return build(1, n)
+
+
+    #98 bst的中序遍历序列一定是递增的
+    def isValidBST(self, root: TreeNode) -> bool:
+        ans=[]
+        def inOrder(root):
+            if not root:
+                return
+            inOrder(root.left)
+            ans.append(root.val)
+            inOrder(root.right)
+        inOrder(root)
+        i=1
+        while i<len(ans):
+            if ans[i]<=ans[i-1]:
+                return False
+        return True
 
 #102
     def levelOrder(self, root):
@@ -264,22 +267,27 @@ class Solution:
         return myBuild(0, len(preorder), 0, len(inorder))
 
     #113 dfs遍历二叉树的所有路径
+    #只不过是在前序遍历上加上了一个判断（访问叶子节点时把items放到ans中）和一个pop（）
+    #然后有target的处理
     def pathSum(self, root: [TreeNode], targetSum: int) -> list[list[int]]:
-        #不能写成item=ans=[]，因为item和ans都是指针，这样会导致两个指针指向同一个列表
-        item,ans=[],[]
-        #dfs至少要两个参数，考虑空节点，写前两行，然后处理当前节点加入路径，判断是否能加入ans，dfs左侧，dfs右侧，完成上述操作后如果还没return，说明当前节点不属于路径，弹出
-        def dfs(node,targetSum):
+        ans=[]
+        items=[]
+        def dfs(node,items,target):
             if not node:
-                return []
-            item.append(node.val)
-            targetSum-=node.val
-            if not node.left and not node.right and targetSum==0:
-                ans.append(item[:])
-                #此处不用return，即使下面是空节点也依然dfs，通过开头的判断来return
-            dfs(node.left,targetSum)
-            dfs(node.right,targetSum)
-            item.pop()
-        dfs(root,targetSum)
+                return
+            #visit部分
+            items.append(node.val)
+            #target是形参，能够隐形回溯，所以之后不用回溯target
+            target-=node.val
+            if not node.left and not node.right:
+                if target==0:
+                    ans.append(items[:])
+
+            dfs(node.left,items,target)
+            dfs(node.right,items,target)
+            #多加一个回溯
+            items.pop()
+        dfs(root,items,targetSum)
         return ans
 
 
@@ -309,18 +317,14 @@ class Solution:
 
 
 
-
-
 if __name__ == '__main__':
-    A = '[1,null,null]'
+    A = '[1,0,1,0,0,1,1,0]'
     A=stringToTreeNode(A)
-    des=[[20,15,1],[20,17,0],[50,20,1],[50,80,0],[80,19,1]]
-    # print(TreeNodeToString(c.deserialize(A)))
-    B = '[]'
-    s=Solution()
-    root=s.createBinaryTree(des)
 
-    print(TreeNodeToString(root))
+    s=Solution()
+
+
+    print(s.findMode(A))
     # print(s.isBalanced(A))
 
 
