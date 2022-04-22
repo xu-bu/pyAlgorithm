@@ -24,6 +24,41 @@ class myQueue:
         return self.queue[0]
 
 class Solution:
+    #496 单调栈，O（n)复杂度解决寻找数组中每个数的下一个比它 大/小 的 数/其下标
+    def nextGreaterElement(self, nums1, nums2):
+        """
+        :type nums1: List[int]
+        :type nums2: List[int]
+        :rtype: List[int]
+        """
+        mono = []
+        dic = {}
+        #单调栈构造方式（存数的情况）
+        for each in nums2:
+            while len(mono)>0 and mono[-1]<each:
+                dic[mono.pop()]=each
+            mono.append(each)
+
+        ans = []
+        for each in nums1:
+            ans.append(dic.get(each, -1))
+        return ans
+
+
+
+    #739 栈存下标的情况
+    def dailyTemperatures(self, temperatures: list[int]) -> list[int]:
+        #栈存下标，元素单调递减
+        mono = []
+        ans = [0] * len(temperatures)
+        for i in range(len(temperatures)):
+            while len(mono)>0 and temperatures[i]>temperatures[mono[-1]]:
+                index=mono.pop()
+                ans[index]=i-index
+            mono.append(i)
+        return ans
+
+    #239
     def maxSlidingWindow(self, nums: list[int], k: int) -> list[int]:
         if k==1:
             return nums

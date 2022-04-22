@@ -31,32 +31,21 @@ def mergeSort(nums):
         return merge(leftList,rightList)
 
 
-
-def partition(arr, left, right):
-    #pivot=left
-    # 随机更换pivot加快速度
-    pivot = random.randint(left,right)
-    arr[pivot],arr[left]=arr[left],arr[pivot]
-    #双指针，快指针i，慢指针index
-    index = pivot+1
-    i = index
-    #i遍历所有数，index是小于arr[pivot]的数该站的位置
-    while  i <= right:
-        if arr[i] < arr[pivot]:
-            arr[i], arr[index] = arr[index], arr[i]
-            index+=1
-        i+=1
-    #index+1导致它指到了下一个位置，所以需要减一
-    arr[pivot], arr[index-1] = arr[index-1], arr[pivot]
-    #返回pivot的位置
-    return index-1
+#随机选出一个下标random_index，然后将nums[random_index]和nums[left]交换，从left+1开始遍历一遍数组，完成遍历时使得比pivot=nums[left]小的数都在它左边，比它大的数都在它右边，最后返回pivot的下标
+def partition(nums, left, right):
+    random_index = random.randint(left, right)
+    nums[random_index], nums[left] = nums[left], nums[random_index]
+    pivot = nums[left]
+    slow = left
+    for fast in range(left + 1, right + 1):
+        if nums[fast] < pivot:  # 小于pivot的元素都被交换到前面
+            slow += 1
+            nums[fast], nums[slow] = nums[slow], nums[fast]
+    #把pivot放到自己应该在的位置
+    nums[left], nums[slow] = nums[slow], nums[left]
+    return slow
 
 
-# arr[] --> 排序数组
-# low  --> 起始索引
-# high  --> 结束索引
-
-# 快速排序函数
 def quickSort(arr, low, high):
     if low < high:
         # pi = partition(arr, low, high)
@@ -64,8 +53,38 @@ def quickSort(arr, low, high):
         quickSort(arr, low, pi - 1)
         quickSort(arr, pi + 1, high)
 
+#自顶向下，递归调整i位置的数
+def downsift(nums,n,i):
+    left,right=2*i+1,2*i+2
+    largest=i
+    #在i的子节点中找到最大的数和i交换
+    #这里改成＞号就可以从大到小排序
+    if left<n and nums[i]<nums[left]:
+        largest=left
+    if right<n and nums[largest]<nums[right]:
+        largest=right
+    # 如果需要交换则交换之后递归下一层
+    #否则递归结束
+    if largest!=i:
+        nums[i],nums[largest]=nums[largest],nums[i]
+        downsift(nums,n,largest)
 
-n=100000
+#时间复杂度：
+#建堆时间O(n)，downsift一次是O(logn)，需要调整n次，所以是O(n*logn)
+def heapSort(nums):
+    n=len(nums)
+    #反向构建堆,这里不用是n，n//2就够了
+    for i in reversed(range(n//2)):
+        downsift(nums,n,i)
+    #从数组尾开始，把每个数跟根节点交换，然后调整根节点
+    for i in reversed(range(n)):
+        nums[0],nums[i]=nums[i],nums[0]
+        #注意这里是i
+        downsift(nums,i,0)
+
+
+
+n=10
 # nums=[]
 # for i in range(1,n):
 #     nums.append(random.randint(1,i))
@@ -73,16 +92,17 @@ n=100000
 # mergeSort(nums)
 # print(f"mergesort runs for {time.time()-startTime}s")
 #
-nums=[]
-for i in range(1,n):
-    nums.append(random.randint(1,i))
-startTime=time.time()
-quickSort(nums,0,len(nums)-1)
-print(f"quicksort runs for {time.time()-startTime}s")
-
 # nums=[]
 # for i in range(1,n):
 #     nums.append(random.randint(1,i))
 # startTime=time.time()
-# sorted(nums)
-# print(f"sort runs for {time.time()-startTime}s")
+# quickSort(nums,0,len(nums)-1)
+# print(f"quicksort runs for {time.time()-startTime}s")
+
+nums=[6,3,688,42,21,1]
+# for i in range(1,n):
+#     nums.append(random.randint(1,i))
+startTime=time.time()
+quickSort(nums,0,len(nums)-1)
+print(f"sort runs for {time.time()-startTime}s")
+print(nums)

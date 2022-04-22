@@ -11,7 +11,6 @@ class TreeNode:
         self.left,self.right=left,right
 
 
-
 #通过root遍历一棵树，初始队列只有根节点，count从0开始递增，每次将queue[count].val加入到输出中，同时将被遍历的节点的孩子节点全部加入到queue中，如果遍历到空节点，则向输出中加入null，直到count==len(queue)
 def TreeNodeToString(root):
     if not root:
@@ -318,14 +317,12 @@ class Solution:
 
 
 if __name__ == '__main__':
-    A = '[1,0,1,0,0,1,1,0]'
-    A=stringToTreeNode(A)
+    A = '[9,3,7,6,5,1,10,2]'
+    root=stringToTreeNode(A)
 
     s=Solution()
-
-
-    print(s.findMode(A))
-    # print(s.isBalanced(A))
+    heap=Heap(A)
+    print(s.levelOrder(heap.root))
 
 
 
