@@ -313,16 +313,16 @@ class Solution:
         while visit[q.val]!=1:
             q=dic[q.val]
         return q
+    
 
 
 
 if __name__ == '__main__':
-    A = '[9,3,7,6,5,1,10,2]'
+    A = '[4,8,5,0,1,null,6]'
     root=stringToTreeNode(A)
 
     s=Solution()
-    heap=Heap(A)
-    print(s.levelOrder(heap.root))
+    print(s.averageOfSubtree(root))
 
 
 

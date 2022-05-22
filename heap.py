@@ -129,6 +129,7 @@ class Solution:
             w -= heapq.heappop(canProfit)
         return w
 
+    #维护k个最大元素的堆的基本模板
     def findKthLargest(self, nums: list[int], k: int) -> int:
         minH = []
         for each in nums:
@@ -170,6 +171,29 @@ class Solution:
                 lists[index] = lists[index].next
                 heapq.heappush(heap, (lists[index].val, index))
         return dummy.next
+
+    #373
+    def kSmallestPairs(self, nums1, nums2, k):
+        """
+        :type nums1: List[int]
+        :type nums2: List[int]
+        :type k: int
+        :rtype: List[List[int]]
+        """
+        heap=[]
+        #固定第一个元素是第一个数组中最小的数，遍历第二个数组，构造可能的最小数对
+        for each in [[0,i]for i in range(min(len(nums2),k))]:
+            heapq.heappush(heap,(nums1[each[0]]+nums2[each[1]],each[0],each[1]))
+        ans=[]
+        #弹出k次，每次都是弹出的最小的
+        while k>0 and len(heap)>0:
+            val,index1,index2=heapq.heappop(heap)
+            ans.append([nums1[index1],nums2[index2]])
+            #弹出最小的index1,index2之后，由于index2是被遍历过的，所以只用变index1，下一个可行的索引只能是index1+1,index2
+            if index1+1<len(nums1):
+                heapq.heappush(heap, (nums1[index1+1]+nums2[index2],index1+1 , index2))
+            k-=1
+        return ans
 
 if __name__ == '__main__':
     nums=[3,324,6,8,0,9]

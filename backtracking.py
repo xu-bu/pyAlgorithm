@@ -140,7 +140,10 @@ class Solution(object):
         dfs(0,target)
         return ans
 
-    #90 全子集的写法与组合一模一样，唯一的不同在于进入backtrack之后直接append(items)，而不是在if i==n里面append
+    #90 全子集与组合的区别在于，组合是n个里面取k个，要求items的长度必须是k，而子集大小是任意的
+    # 所以写法上有两个区别
+    # 1.进入backtrack之后直接append(items)，而不是在if i==n里面append
+    # 2.递归出口是i==n,并且直接return
     #此题还涉及到去重，不用效率低下的if items in ans，而是将nums排序后在for循环中做判断，和组合中的去重一模一样
     def subsetsWithDup(self, nums):
         ans, items = [], []

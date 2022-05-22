@@ -1,4 +1,5 @@
 import collections
+import functools
 
 
 class Solution(object):
@@ -28,36 +29,7 @@ class Solution(object):
                     ans += 1
         return ans
 
-    def exist(self, board, word):
-        """
-        :type board: List[List[str]]
-        :type word: str
-        :rtype: bool
-        """
-        rows,columns=len(board),len(board[0])
-        n=len(word)
-        if n>rows*columns:
-            return False
 
-        def dfs(i,j,k):
-            if not 0 <= i < rows or not 0 <= j < columns or board[i][j] != word[k]:
-                return False
-            #加等号解决word是一个字母的情况
-            if k >= n-1:
-                return True
-            temp=board[i][j]
-            board[i][j]=' '
-            res = dfs(i + 1, j, k + 1) or dfs(i - 1, j, k + 1) or dfs(i, j + 1, k + 1) or dfs(i, j - 1, k + 1)
-            board[i][j]=temp
-            return res
-
-
-        for i in range(rows):
-            for j in range(columns):
-                if board[i][j]==word[0]:
-                    if dfs(i, j, 0):
-                        return True
-        return False
 
     #207 判断有向图中有无环
     def canFinish(self, numCourses, prerequisites):
@@ -93,6 +65,27 @@ class Solution(object):
             if not dfs(each[0]):
                 return False
         return True
+
+    #2267
+    def hasValidPath(self, grid: list[list[str]]) -> bool:
+        columns, rows = len(grid[0]), len(grid)
+        if (columns + rows - 1) % 2 != 0 or grid[0][0] == ')' or grid[rows - 1][columns - 1] == '(':
+            return False
+
+        # condition记录平衡度，遇到左括号+1，遇到右括号-1，必须一直保持>=0
+        # dfs函数表示从x,y位置开始，能否完成找到一条成功的路径
+        @functools.cache
+        def dfs(x, y, condition):
+            # 路径长度是rows+columns-1,所以剩下的括号数量为rows+columns-1-x-y，c不能超过这个值
+            if condition < 0 or condition > rows + columns - 1 - x - y:
+                return False
+            condition += 1 if grid[x][y] == '(' else -1
+            if x == rows - 1 and y == columns - 1 and condition == 0:
+                return True
+            # 往左走完成，或者往右走完成
+            return (x + 1 < rows and dfs(x + 1, y, condition)) or (y + 1 < columns and dfs(x, y + 1, condition))
+
+        return dfs(0, 0, 0)
 
 if __name__ == '__main__':
     board = [["A","B","C","E"],["S","F","C","S"],["A","D","E","E"]]
