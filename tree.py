@@ -1,6 +1,6 @@
 import collections
 from queue import Queue
-
+from typing import Optional
 
 class TreeNode:
     val=0
@@ -313,16 +313,49 @@ class Solution:
         while visit[q.val]!=1:
             q=dic[q.val]
         return q
-    
+
+    def amountOfTime(self, root: Optional[TreeNode], start: int) -> int:
+        dic = collections.defaultdict(set)
+        nodes=set()
+        def preOrder(root):
+            if root:
+                nodes.add(root.val)
+            if root.left:
+                dic[root.val].add(root.left.val)
+                dic[root.left.val].add(root.val)
+                preOrder(root.left)
+            if root.right:
+                dic[root.val].add(root.right.val)
+                dic[root.right.val].add(root.val)
+                preOrder(root.right)
+        view=[False for _ in range(10001)]
+        preOrder(root)
+        nodes.remove(start)
+        candidate=[[start]]
+        index=0
+        ans=0
+        while index<len(candidate):
+            new = set()
+            if len(nodes) == 0:
+                return ans
+            for each in candidate[index]:
+                if view[each]:
+                    continue
+                view[each]=True
+                new|=dic[each]
+                nodes-=dic[each]
+            ans += 1
+            candidate.append(list(new))
+            index+=1
 
 
 
 if __name__ == '__main__':
-    A = '[4,8,5,0,1,null,6]'
+    A = '[1,5,3,null,4,10,6,9,2]'
     root=stringToTreeNode(A)
 
     s=Solution()
-    print(s.averageOfSubtree(root))
+    print(s.amountOfTime(root,3))
 
 
 

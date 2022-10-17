@@ -1,6 +1,6 @@
 import collections
 import functools
-
+from typing import List
 
 class Solution(object):
     #200图中搜索岛屿数量
@@ -31,7 +31,7 @@ class Solution(object):
 
 
 
-    #207 判断有向图中有无环
+    #207 dfs判断有向图中有无环
     def canFinish(self, numCourses, prerequisites):
         """
         :type numCourses: int
@@ -66,6 +66,24 @@ class Solution(object):
                 return False
         return True
 
+    #210 bfs拓扑排序
+    def findOrder(self, numCourses, prerequisites):
+        degrees=[0 for _ in range(numCourses)]
+        dic=collections.defaultdict(list)
+        for pre,course in prerequisites:
+            degrees[course-1]+=1
+            dic[pre-1].append(course-1)
+        queue=collections.deque(key for key,val in enumerate(degrees) if val==0)
+        order=[]
+        while queue:
+            cur=queue.popleft()
+            order.append(cur)
+            for each in dic[cur]:
+                degrees[each]-=1
+                if(degrees[each]==0):
+                    queue.append(each)
+        return order if len(order)==numCourses else []
+
     #2267
     def hasValidPath(self, grid: list[list[str]]) -> bool:
         columns, rows = len(grid[0]), len(grid)
@@ -87,9 +105,13 @@ class Solution(object):
 
         return dfs(0, 0, 0)
 
+
+
 if __name__ == '__main__':
-    board = [["A","B","C","E"],["S","F","C","S"],["A","D","E","E"]]
-    word = "ABCB"
+    n=8
+    row=[[1, 2], [7, 3], [4, 3], [5, 8], [7, 8], [8, 2], [5, 8], [3, 2], [1, 3], [7, 6], [4, 3], [7, 4], [4, 8], [7, 3],
+     [7, 5]]
+    col=[[5, 7], [2, 7], [4, 3], [6, 7], [4, 3], [2, 3], [6, 2]]
 
     solution=Solution()
-    print(solution.exist(board,word))
+    print(solution.buildMatrix(n,row,col))

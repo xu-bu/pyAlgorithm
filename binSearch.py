@@ -1,17 +1,5 @@
 import bisect
 
-
-def binSearchRecur(nums,target):
-    if len(nums)==0:
-        return False
-    mid=len(nums)//2
-    if nums[mid]==target:
-        return True
-    elif nums[mid]>target:
-        return binSearchRecur(nums[:mid],target)
-    else:
-        return binSearchRecur(nums[mid+1:],target)
-
 def binSearchIter(nums,target):
     l=0
     r=len(nums)-1
