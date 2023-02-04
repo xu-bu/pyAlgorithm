@@ -29,43 +29,6 @@ class Solution(object):
                     ans += 1
         return ans
 
-
-
-    #207 dfs判断有向图中有无环
-    def canFinish(self, numCourses, prerequisites):
-        """
-        :type numCourses: int
-        :type prerequisites: List[List[int]]
-        :rtype: bool
-        """
-        #0表示未开始，1表示搜索中，2表示已完成
-        verdict=[0]*numCourses
-        dic=collections.defaultdict(list)
-        for each in prerequisites:
-            dic[each[0]].append(each[1])
-        #课程c是否可学
-        def dfs(c):
-            if verdict[c]==2:
-                return True
-            elif verdict[c]==1:
-                return False
-            verdict[c]=1
-            for preCourse in dic[c]:
-                if verdict[preCourse]==2:
-                    continue
-                if not dfs(preCourse):
-                    return False
-            verdict[c]=2
-            return True
-
-
-        for each in prerequisites:
-            if verdict[each[0]]==2:
-                continue
-            if not dfs(each[0]):
-                return False
-        return True
-
     #210 bfs拓扑排序
     def findOrder(self, numCourses, prerequisites):
         degrees=[0 for _ in range(numCourses)]
