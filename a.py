@@ -1,5 +1,7 @@
 import bisect
 import collections
+import copy
+import functools
 from functools import *
 import heapq
 import itertools
@@ -8,8 +10,8 @@ import math
 import string
 from decimal import Decimal
 from math import gcd
-from sortedcontainers import SortedList
 from typing import List, Union, Optional
+from sortedcontainers import SortedList
 
 
 class TreeNode:
@@ -30,55 +32,50 @@ class ListNode:
             print(p.val, end="->")
             p = p.next
 
-
-import random
-
 class Solution:
-    def smallerNumbersThanCurrent(self, nums: List[int]) -> List[int]:
-        def merge(l:List[int],r:List[int])->List[int]:
-            p,q=0,0
-            ret=[]
-            while p<len(l) and q<len(r):
-                if nums[l[p]]<nums[r[q]]:
-                    ret.append(l[p])
-                    p+=1
+    def minimumOperations(self, grid: List[List[int]]) -> int:
+        rows,cols=len(grid),len(grid[0])
+        dp=[0 for _ in range(cols+1)]
+        # best, ops, second ops
+        # if can trans to best, we need ops, otherwise, need second ops
+        def getCol(col):
+            count =collections.Counter(grid[row][col] for row in range(rows))
+            best=max(count,key=count.get)
+            bestOps=rows-count[best]
+            del count[best]
+            if len(count)>0:
+                secondOps =rows- count[max(count, key=count.get)]
+            else:
+                secondOps=rows
+            return {"best":best,"bestOps":bestOps,"secondOps":secondOps}
+        # always need to know what we choose on right
+        right=getCol(cols-1)
+        dp[cols-1]=right["bestOps"]
+        for col in reversed(range(cols-1)):
+            cur=getCol(col)
+            # if cur can choose best, we choose it simply then update what we choose on right
+            if cur["best"]!=right["best"]:
+                dp[col]=cur["bestOps"]+dp[col+1]
+                right = cur
+            # otherwise, we compare
+            else:
+                if cur["bestOps"]+right["secondOps"]+dp[col+2]>cur["secondOps"]+right["bestOps"]+dp[col+2]:
+                    dp[col]=cur["secondOps"]+right["bestOps"]+dp[col+2]
+                    right = cur
                 else:
-                    ret.append(r[q])
-                    q += 1
-            while p<len(l):
-                ret.append(l[p])
-                p += 1
-            while q<len(r):
-                ret.append(r[q])
-                q += 1
-            return ret
+                    dp[col] = cur["bestOps"]+right["secondOps"]+dp[col+2]
+                    right = cur
 
-        def mergeSort(array):
-            if len(array)<=1:
-                return array
-            mid=len(array)//2
-            l=mergeSort(array[:mid])
-            r=mergeSort(array[mid:])
-            return merge(l,r)
-
-        indexs=[i for i in range(len(nums))]
-        indexs=mergeSort(indexs)
-        ans=[0 for _ in range(len(nums))]
-        for i in range(len(indexs)):
-            if i>0 and nums[indexs[i]]==nums[indexs[i]-1]:
-                
-            ans[indexs[i]]=i
-        return ans
+        return dp[0]
 
 if __name__ == '__main__':
     solution = Solution()
-    garbage = ["G", "P", "GP", "GG"]
-    nums1 = [3, 2, 5]
-    nums2 = [2, 2, 1]
-    diff = 1
+    nums = [2, 3, 0, 0, 2]
+    k = 4
+    grid=[[1,9,7,7,9,8,3],[6,9,6,7,2,4,4],[1,1,3,6,6,6,7],[6,3,3,9,6,2,6],[8,6,2,9,7,1,4],[6,1,2,5,9,6,4],[1,5,1,9,8,6,0]]
+    for each in grid:
+        for each2 in each:
+            print(each2,end=' ')
+        print()
+    print(solution.minimumOperations(grid))
 
-    root = TreeNode(1)
-    root.left = 5
-    n = 15
-    nums = [8,1,2,2,3]
-    print(solution.smallerNumbersThanCurrent(nums))
