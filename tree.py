@@ -1,6 +1,7 @@
 import collections
 from queue import Queue
-from typing import Optional
+from typing import Optional,List
+import string
 
 class TreeNode:
     val=0
@@ -12,7 +13,7 @@ class TreeNode:
 
 
 #通过root遍历一棵树，初始队列只有根节点，count从0开始递增，每次将queue[count].val加入到输出中，同时将被遍历的节点的孩子节点全部加入到queue中，如果遍历到空节点，则向输出中加入null，直到count==len(queue)
-def TreeNodeToString(root):
+def TreeNodeToString(root)->string:
     if not root:
         return "[]"
     output = ""
@@ -314,14 +315,27 @@ class Solution:
             q=dic[q.val]
         return q
 
-
+    def maximumPoints(self, edges: List[List[int]], coins: List[int], k: int) -> int:
+        nodes = [TreeNode(coin) for coin in coins]
+        inDegree = [0 for _ in range(len(coins))]
+        for each in edges:
+            inDegree[each[1]] += 1
+            parent = nodes[each[0]]
+            child = nodes[each[1]]
+            if not parent.left:
+                parent.left = child
+            else:
+                parent.right = child
+        root = nodes[inDegree.index(0)]
+        return root
 
 if __name__ == '__main__':
-    A = '[1,5,3,null,4,10,6,9,2]'
-    root=stringToTreeNode(A)
+    edges = [[0,1],[1,2],[2,3]]
+    coins = [10,10,3,3]
+    k = 5
 
-    s=Solution()
-    print(s.amountOfTime(root,3))
+    s = Solution()
+    print(TreeNodeToString(s.maximumPoints(edges,coins,k)))
 
 
 
